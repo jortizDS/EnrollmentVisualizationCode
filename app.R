@@ -3,8 +3,8 @@
 # the 'Run App' button above.
 #
 # load libraries
-install.packages("renv")
-renv::init()
+#install.packages("renv")
+#renv::init()
 library(shiny)
 library(readxl)
 library(dplyr)
@@ -2184,6 +2184,7 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
 
 
 
