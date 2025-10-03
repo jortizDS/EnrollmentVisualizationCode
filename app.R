@@ -41,10 +41,10 @@ input = data.frame(level = "Graduate",
                    levelYN = F,
                    collegeYN = F,
                    majorYN = F,
-                   conc = F,
+                   conc = T,
                    degreeYN = F,
-                   semester = "Fall",
-                   year = 2018)
+                   semester = "Spring",
+                   year = 2024)
 
 # code ----
 ui <- fluidPage(
@@ -248,7 +248,7 @@ server <- function(input, output, session) {
         # Show race and URM side-by-side
         fluidRow(
           column(12,
-                 h3("Enrollment over Time"),
+                 h3("Enrollment over Time", tags$small(" - Note: Fall semesters are shown under the next Fiscal Year e.g. Fall 2024 appears in FY25")),
                  div(
                    style = paste0("height:", plot_height, "; overflow-y:auto;"),
                    shinycssloaders::withSpinner(
@@ -262,7 +262,7 @@ server <- function(input, output, session) {
         # Show race and URM side-by-side
         fluidRow(
           column(12,
-                 h3("Enrollment over Time"),
+                 h3("Enrollment over Time", tags$small(" - Note: Fall semesters are shown under the next Fiscal Year e.g. Fall 2024 appears in FY25")),
                  div(
                    style = paste0("height:", "30vh", "; overflow-y:auto;"),
                    shinycssloaders::withSpinner(
@@ -439,8 +439,8 @@ server <- function(input, output, session) {
       ggplot(aes(x = FY, y = Total, fill = Semester)) +
       geom_col() +
       theme_minimal() +
-      labs(title = "Major Enrollment over Time", x = "Fiscal Year", y = "Enrollment",
-           subtitle = "Please note: Fall semesters are shown under the next Fiscal Year e.g. Fall 2024 appears in FY25") + 
+      labs(title = "Major Enrollment over Time", x = "Fiscal Year", y = "Enrollment" )+ #,
+           #subtitle = "Please note: Fall semesters are shown under the next Fiscal Year e.g. Fall 2024 appears in FY25") + 
           theme(axis.text.y = element_text(size = 12),
                 axis.text.x = element_text(size = 15),
                 legend.text = element_text(size = 12),
@@ -465,12 +465,11 @@ server <- function(input, output, session) {
        conc_list <- split(all_data, all_data$`Concentration Name (if any)`)
         
        min_max = sort(unique(all_data$Year))
+       
+       
         plot_list <- lapply(conc_list, function(df) {
-        # conc_list[[6]] %>% 
-          #ungroup() %>%
-          #df = df %>%
-           # mutate(FYear = as.numeric(paste0("20", substr(Year, 2, 3))),
-            #       Semester = factor(Semester, levels = rev(c("fa", "sp", "su")), ordered = TRUE)) 
+        #df= conc_list[[5]] %>% ungroup() %>%
+          #df = df %>% mutate(FYear = as.numeric(paste0("20", substr(Year, 2, 3))), Semester = factor(Semester, levels = rev(c("fa", "sp", "su")), ordered = TRUE)) 
           
           missing_years =  min_max[!(min_max %in% df$Year)]
           
@@ -483,8 +482,10 @@ server <- function(input, output, session) {
           if (length(missing_years) > 0) {
             df = bind_rows(lapply(1:length(missing_years), function(x) {
               OG_copy_x = OG_copy  %>%
-                mutate(Year  = as.character(missing_years[x]),
-                       FY = paste0("'", as.character(missing_years[x])))
+                mutate(Year  = as.character(missing_years[x])) %>%
+                  mutate(FiscalYear = ifelse(Semester == "fa", as.numeric((Year))+ 1, as.numeric(Year))) %>%
+                  mutate(FY = paste0("'", dataRetrieval::zeroPad(FiscalYear, padTo = 2 )),
+                         Semester = factor(Semester, levels = rev(c("fa", "sp", "su")), ordered = TRUE))
               OG_copy_x
             })%>% bind_rows(), df)
           }
@@ -496,8 +497,8 @@ server <- function(input, output, session) {
             theme_minimal() +
             # Major_total
             labs(title = paste(unique(df$`Major Name`), "Major concentration:", unique(df$`Concentration Name (if any)`)), 
-                 x = "Fiscal Year", y = "Enrollment",
-                 subtitle = "Please note: Fall semesters are shown under the next Fiscal Year e.g. Fall 2024 appears in FY25") +
+                 x = "Fiscal Year", y = "Enrollment" )+#,
+                 #subtitle = "Please note: Fall semesters are shown under the next Fiscal Year e.g. Fall 2024 appears in FY25") +
             theme(legend.position = "right", legend.justification = "top",
                   strip.text.x = element_text(size = 15),
                   axis.text.y = element_text(size = 12),
@@ -529,8 +530,8 @@ server <- function(input, output, session) {
       } else {
         TSplot +
           # Major_total
-          labs(title = "Enrollment over Time by Major concentration", x = "Fiscal Year", y = "Enrollment",
-               subtitle = "Please note: Fall semesters are shown under the next Fiscal Year e.g. Fall 2024 appears in FY25") +
+          labs(title = "Enrollment over Time by Major concentration", x = "Fiscal Year", y = "Enrollment")+#,
+               #subtitle = "Please note: Fall semesters are shown under the next Fiscal Year e.g. Fall 2024 appears in FY25") +
           facet_wrap(~ factor(`Concentration Name (if any)`, levels = conc_orders, ordered = T), scales = "free_y", ncol = 1) +
           theme(legend.position = "right", legend.justification = "top",
                 strip.text.x = element_text(size = 15),
@@ -601,8 +602,8 @@ server <- function(input, output, session) {
             theme_minimal() +
             # Major_total
             labs(title = paste(input$level, unique(df$`Major Name`), "Program enrollment by Degree:", unique(df$Degree)), 
-                 x = "Fiscal Year", y = "Enrollment",
-                 subtitle = "Please note: Fall semesters are shown under the next Fiscal Year e.g. Fall 2024 appears in FY25") +
+                 x = "Fiscal Year", y = "Enrollment")+#,
+                # subtitle = "Please note: Fall semesters are shown under the next Fiscal Year e.g. Fall 2024 appears in FY25") +
             theme(legend.position = "right", legend.justification = "top",
                   strip.text.x = element_text(size = 15),
                   axis.text.y = element_text(size = 12),
@@ -631,8 +632,8 @@ server <- function(input, output, session) {
       } else {
         TSplot +
           # Major_total
-          labs(title = "Enrollment over Time by Degree", x = "Fiscal Year", y = "Enrollment",
-               subtitle = "Please note: Fall semesters are shown under the next Fiscal Year e.g. Fall 2024 appears in FY25") +
+          labs(title = "Enrollment over Time by Degree", x = "Fiscal Year", y = "Enrollment" )+#,
+           #    subtitle = "Please note: Fall semesters are shown under the next Fiscal Year e.g. Fall 2024 appears in FY25") +
           facet_wrap(~ factor(Degree, levels = degree_orders, ordered = T), scales = "free_y", ncol = 1) +
           theme(legend.position = "right", legend.justification = "top",
                 strip.text.x = element_text(size = 15),
