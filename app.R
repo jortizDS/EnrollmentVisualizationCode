@@ -12,6 +12,7 @@ library(tidyr)
 library(gridExtra)
 library(scales)
 library(stringr)
+install.packages("shinyjs")
 library(shinyjs)
 library(purrr)
 library(readr)
@@ -2181,4 +2182,5 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
 
