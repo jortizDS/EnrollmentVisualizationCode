@@ -3,8 +3,6 @@
 # the 'Run App' button above.
 #
 # load libraries
-#install.packages("renv")
-#renv::init()
 library(shiny)
 library(readxl)
 library(dplyr)
@@ -14,11 +12,11 @@ library(tidyr)
 library(gridExtra)
 library(scales)
 library(stringr)
-#install.packages("shinyjs")
 library(shinyjs)
 library(purrr)
 library(readr)
 #library(plotly)
+
 
 # load data 
 data_names <- list.files("Data/", pattern = ".RDS", full.names = TRUE)
@@ -2184,8 +2182,4 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-
-
-
-
 
